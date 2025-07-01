@@ -1,0 +1,26 @@
+# Ignore Rust build output
+target/
+*.rlib
+*.so
+
+# Ignore wallet keys
+dev-wallet.json
+turbin3-wallet.json
+
+# Ignore Node output
+node_modules/
+dist/
+
+# Ignore misc
+.DS_Store
+.env
+
+# Ignore wallet files
+# dev-wallet.json
+turbin3-wallet.json
+
+# Ignore Rust build files
+target/
+
+# Ignore lockfile if you're not committing it
+Cargo.lock
