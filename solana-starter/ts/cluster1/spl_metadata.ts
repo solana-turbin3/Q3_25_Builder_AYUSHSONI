@@ -9,7 +9,6 @@ import {
 import { createSignerFromKeypair, signerIdentity, publicKey } from "@metaplex-foundation/umi";
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 
-// Define our Mint address
 const mint = publicKey("jCPeK2nuMBRhxFCFiPmrV5gjraH4QidpZNbg6uirQey")
 
 // Create a UMI connection
@@ -20,7 +19,6 @@ umi.use(signerIdentity(createSignerFromKeypair(umi, keypair)));
 
 (async () => {
     try {
-        // Start here
         let accounts: CreateMetadataAccountV3InstructionAccounts = {
             mint,
             mintAuthority:signer
