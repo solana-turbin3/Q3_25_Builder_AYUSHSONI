@@ -16,6 +16,6 @@ pub mod anchor_nft_staking {
     use super::*;
 
     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        initialize::handler(ctx)
+        initialize_config::handler(ctx)
     }
 }
