@@ -82,7 +82,7 @@ impl<'info> Payment<'info> {
 
         // require_gt!(amount, Rent::get()?.minimum_balance(0), VaultError::InvalidAmount);
 
-         let cpi_program  = self.system_program.to_account_info();
+        let cpi_program  = self.system_program.to_account_info();
 
         let cpi_accounts = Transfer{
             from: self.user.to_account_info(),
@@ -98,7 +98,7 @@ impl<'info> Payment<'info> {
 
     //   require_neq!(ctx.accounts.vault.lamports(), 0, VaultError::InvalidAmount);
 
-             let cpi_program  = self.system_program.to_account_info();
+        let cpi_program  = self.system_program.to_account_info();
 
         let cpi_accounts = Transfer{
             from: self.vault.to_account_info(),
@@ -147,12 +147,14 @@ impl<'info> Initialize<'info>{
 pub struct Close<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
+    
     #[account(
         mut,
         seeds = [b"vault", vault_state.key().as_ref()],
         bump = vault_state.vault_bump,
     )]
     pub vault: SystemAccount<'info>,
+    
     #[account(
         mut,
         seeds = [b"state", user.key().as_ref()],
@@ -160,6 +162,7 @@ pub struct Close<'info> {
         close = user,
     )]
     pub vault_state: Account<'info, VaultState>,
+    
     pub system_program: Program<'info, System>,
 }
 
@@ -187,20 +190,6 @@ impl<'info> Close<'info> {
         Ok(())
     }
 }
-
-// #[derive(AnchorDeserialize,AnchorSerialize,Default,Debug,Clone)]
-// pub struct InitializeBumps{
-//     pub vault: u8,
-//     pub vault_state: u8,
-// }
-
-// #[error_code]
-// pub enum VaultError {
-//   #[msg("Vault already exists")]
-//   VaultAlreadyExists,
-//   #[msg("Invalid amount")]
-//   InvalidAmount,
-// }
 
 #[account]
 pub struct VaultState {
