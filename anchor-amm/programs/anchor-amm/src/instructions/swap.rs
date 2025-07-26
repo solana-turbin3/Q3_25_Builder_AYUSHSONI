@@ -12,9 +12,12 @@ use crate::{error::AmmError, state::Config};
 
 #[derive(Accounts)]
 pub struct Swap<'info>{
+    
     #[account(mut)]
     pub user: Signer<'info>,
+    
     pub mint_x:Account<'info,Mint>,
+    
     pub mint_y:Account<'info,Mint>,
 
     #[account(
@@ -24,6 +27,7 @@ pub struct Swap<'info>{
         associated_token::authority = user,
     )]
     pub user_x:Account<'info,TokenAccount>,
+    
     #[account(
         init_if_needed,
         payer = user,
@@ -38,6 +42,7 @@ pub struct Swap<'info>{
         associated_token::authority = config,
     )]
     pub vault_x:Account<'info,TokenAccount>,
+    
     #[account(
         mut,
         associated_token::mint = mint_y,
@@ -54,7 +59,9 @@ pub struct Swap<'info>{
     pub config:Account<'info,Config>,
 
     pub token_program:Program<'info,Token>,
+    
     pub associated_token_program: Program<'info, AssociatedToken>,
+    
     pub system_program:Program<'info,System>,
 }
 
