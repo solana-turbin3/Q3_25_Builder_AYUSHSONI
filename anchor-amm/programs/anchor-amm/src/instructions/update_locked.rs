@@ -31,5 +31,6 @@ impl<'info>Update<'info>{
         );
         self.config.locked = false;
         Ok(())
+        
     }
 }
