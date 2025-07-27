@@ -50,7 +50,7 @@ pub struct Take<'info>{
         has_one = mint_a,
         has_one = mint_b,
         seeds = [b"escrow",maker.key().as_ref(),escrow.seed.to_be_bytes().as_ref()],
-        bump,
+        bump = escrow.bump,
     )]
     pub escrow : Account<'info,Escrow>,
 
@@ -65,4 +65,41 @@ pub struct Take<'info>{
     pub associated_token_program : Program<'info,AssociatedToken>,
     pub token_program : Interface<'info,TokenInterface>,
     pub system_program : Program<'info,System>,
+}
+
+
+impl <'info>Take<'info> {
+    pub fn deposit(&mut self) -> Result<()>{
+        let transfer_accounts = TransferChecked{
+            from: self.taker_ata_b.to_account_info(),
+            mint: self.mint_b.to_account_info(),
+            to:self.maker_ata_b.to_account_info(),
+            authority:self.taker.to_account_info(),
+        };
+
+        let cpi_ctx = CpiContext::new(self.token_program.to_account_info(), transfer_accounts);
+
+        transfer_checked(cpi_ctx,self.escrow.receive, self.mint_b.decimals)
+    }
+
+    pub fn withdraw(&mut self) -> Result<()>{
+
+       let signer_seeds: [&[&[u8]]; 1] = [&[
+            b"escrow",
+            self.maker.to_account_info().key.as_ref(),
+            &self.escrow.seed.to_le_bytes()[..],
+            &[self.escrow.bump],
+        ]];
+
+        let transfer_accounts = TransferChecked{
+            from: self.vault.to_account_info(),
+            mint: self.mint_a.to_account_info(),
+            to: self.taker_ata_a.to_account_info(),
+            authority: self.escrow.to_account_info(),
+        };
+
+        let cpi_ctx = CpiContext::new_with_signer(self.token_program.to_account_info(), transfer_accounts, &signer_seeds,);
+
+        transfer_checked(cpi_ctx, self.vault.amount, self.mint_a.decimals)?;
+    }
 }
