@@ -11,8 +11,11 @@ use crate::{state::Config,error::AmmError};
 pub struct Deposit<'info>{
     #[account(mut)]
     pub user: Signer<'info>,
+    
     pub mint_x: Account<'info, Mint>,
+    
     pub mint_y: Account<'info,Mint>,
+    
      #[account(
         mut,
         seeds = [b"lp",config.key().as_ref()],
@@ -21,6 +24,7 @@ pub struct Deposit<'info>{
         mint::authority = config,
     )]
     pub mint_lp: Account<'info,Mint>,
+    
     #[account(
        has_one = mint_x,
        has_one = mint_y,
@@ -67,7 +71,9 @@ pub struct Deposit<'info>{
     pub user_lp: Account<'info,TokenAccount>,
 
     pub token_program: Program<'info,Token>,
+    
     pub associated_token_program: Program<'info,AssociatedToken>,
+    
     pub system_program: Program<'info,System>,
 }
 
@@ -118,6 +124,7 @@ impl<'info> Deposit<'info>{
 
     pub fn mint_lp_token(&self, amount: u64) -> Result<()> {
         let cpi_program  = self.token_program.to_account_info();
+        
         let cpi_accounts = MintTo{
             mint:self.mint_lp.to_account_info(),
             to:self.user_lp.to_account_info(),

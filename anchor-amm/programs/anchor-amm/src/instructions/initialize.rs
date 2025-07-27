@@ -11,8 +11,11 @@ use crate::state::Config;
 pub struct Initialize<'info> {
     #[account(mut)]
     pub initializer: Signer<'info>,
+    
     pub mint_x: Account<'info, Mint>,
+    
     pub mint_y: Account<'info,Mint>,
+    
     #[account(
         init,
         payer = initializer,
@@ -22,6 +25,7 @@ pub struct Initialize<'info> {
         mint::authority = config,
     )]
     pub mint_lp: Account<'info,Mint>,
+    
     #[account(
         init,
         payer = initializer,
@@ -48,7 +52,9 @@ pub struct Initialize<'info> {
     pub vault_y: Account<'info,TokenAccount>,
 
     pub token_program: Program<'info,Token>,
+    
     pub associated_token_program: Program<'info,AssociatedToken>,
+    
     pub system_program: Program<'info,System>,
     
 }

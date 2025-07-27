@@ -9,16 +9,21 @@ use crate::{state::Config,error::AmmError};
 
 #[derive(Accounts)]
 pub struct Withdraw<'info>{
+    
     #[account(mut)]
     pub user: Signer<'info>,
+    
     pub mint_x: Account<'info, Mint>,
+    
     pub mint_y: Account<'info,Mint>,
+    
      #[account(
         mut,
         seeds = [b"lp",config.key().as_ref()],
         bump = config.config_bump,
     )]
     pub mint_lp: Account<'info,Mint>,
+    
     #[account(
        has_one = mint_x,
        has_one = mint_y,
@@ -66,7 +71,9 @@ pub struct Withdraw<'info>{
     pub user_lp: Account<'info,TokenAccount>,
 
     pub token_program: Program<'info,Token>,
+    
     pub associated_token_program: Program<'info,AssociatedToken>,
+    
     pub system_program: Program<'info,System>,
 }
 
