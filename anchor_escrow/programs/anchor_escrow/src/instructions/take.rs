@@ -1,8 +1,7 @@
 use anchor_lang::prelude::*;
 
 use anchor_spl::{
-    associated_token::AssociatedToken,
-    token_interface::{transfer_checked,Mint,TokenAccount,TokenInterface,TransferChecked},
+    associated_token::AssociatedToken, token::{close_account, CloseAccount}, token_interface::{transfer_checked,Mint,TokenAccount,TokenInterface,TransferChecked}
 };
 use crate::Escrow;
 
@@ -82,7 +81,7 @@ impl <'info>Take<'info> {
         transfer_checked(cpi_ctx,self.escrow.receive, self.mint_b.decimals)
     }
 
-    pub fn withdraw(&mut self) -> Result<()>{
+    pub fn withdraw_and_close_vault(&mut self) -> Result<()>{
 
        let signer_seeds: [&[&[u8]]; 1] = [&[
             b"escrow",
@@ -101,5 +100,15 @@ impl <'info>Take<'info> {
         let cpi_ctx = CpiContext::new_with_signer(self.token_program.to_account_info(), transfer_accounts, &signer_seeds,);
 
         transfer_checked(cpi_ctx, self.vault.amount, self.mint_a.decimals)?;
+
+        let accounts = CloseAccount{
+            account: self.vault.to_account_info(),
+            destination: self.taker.to_account_info(),
+            authority:self.escrow.to_account_info(),
+        };
+
+        let ctx = CpiContext::new_with_signer(self.token_program.to_account_info(), accounts, &signer_seeds);
+
+        close_account(ctx)
     }
 }
