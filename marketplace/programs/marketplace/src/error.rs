@@ -1,7 +1,16 @@
 use anchor_lang::prelude::*;
 
 #[error_code]
-pub enum ErrorCode {
-    #[msg("Custom error message")]
-    CustomError,
+pub enum MarketplaceError {
+    #[msg("Invalid fee percentage")]
+    InvalidFeePercentage,
+
+    #[msg("Invalid price")]
+    InvalidPricing,
+
+    #[msg("List is not active")]
+    ListNotActive,
+
+    #[msg("math overflow")]
+    MathOverflow,
 }
