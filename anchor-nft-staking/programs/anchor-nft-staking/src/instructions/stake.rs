@@ -18,7 +18,14 @@ pub struct Stake<'info>{
     #[account(mut)]
     pub user: Signer<'info>,
 
-    pub mint: Account<'info,Mint>,
+    #[account(
+     mut,
+     seeds = [b"user",user.key().as_ref()],
+     bump = user_account.bump
+     )]
+     pub user_account: Account<'info,UserAccount>,
+     
+    pub nft_mint: Account<'info,Mint>,
 
     pub collection_mint:Account<'info,Mint>,
     
@@ -62,12 +69,6 @@ pub struct Stake<'info>{
    )]
    pub config:Account<'info,StakeConfig>,
 
-   #[account(
-    mut,
-    seeds = [b"user",user.key().as_ref()],
-    bump = user_account.bump
-    )]
-    pub user_account: Account<'info,UserAccount>,
 
     #[account(
         init,
@@ -85,5 +86,12 @@ pub struct Stake<'info>{
 }
 
 impl <'info>Stake<'info> {
-    
+    pub fn stake(&mut self, bumps:&StakeBumps) -> Result<()>{
+        require!(
+            self.user_account.amount_staked < self.config.max_stake,NFTStakingError::MaxStakeReachedError
+        );
+        
+        self.sta
+
+    }
 }
