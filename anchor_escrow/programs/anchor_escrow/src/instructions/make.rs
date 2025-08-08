@@ -34,7 +34,7 @@ pub struct Make<'info> {
     #[account(
         init,
         payer = maker,
-        seeds = [b"escrow",maker.key().as_ref(),seed.to_le_bytes().as_ref()],
+        seeds = [b"escrow",maker.key().as_ref(),seed.to_be_bytes().as_ref()],
         space = 8 + Escrow::INIT_SPACE,
         bump
     )]

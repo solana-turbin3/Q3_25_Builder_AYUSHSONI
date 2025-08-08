@@ -36,7 +36,7 @@ pub struct Take<'info>{
     #[account(
         init_if_needed,
         payer = taker,
-        associated_token::mint = mint_a,
+        associated_token::mint = mint_b,
         associated_token::authority = maker,
         associated_token::token_program = token_program,
     )]
@@ -86,7 +86,7 @@ impl <'info>Take<'info> {
        let signer_seeds: [&[&[u8]]; 1] = [&[
             b"escrow",
             self.maker.to_account_info().key.as_ref(),
-            &self.escrow.seed.to_le_bytes()[..],
+            &self.escrow.seed.to_be_bytes()[..],
             &[self.escrow.bump],
         ]];
 

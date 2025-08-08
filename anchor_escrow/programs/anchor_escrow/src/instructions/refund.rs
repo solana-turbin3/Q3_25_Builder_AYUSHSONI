@@ -30,7 +30,7 @@ pub struct Refund<'info> {
         close = maker,
         has_one = mint_a,
         has_one = maker,
-        seeds = [b"escrow",maker.key().as_ref(),escrow.seed.to_le_bytes().as_ref()],
+        seeds = [b"escrow",maker.key().as_ref(),escrow.seed.to_be_bytes().as_ref()],
         bump = escrow.bump
     )]
     pub escrow: Account<'info,Escrow>,
