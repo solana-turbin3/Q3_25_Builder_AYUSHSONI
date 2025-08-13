@@ -1,31 +1,59 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Token, TokenAccount, Transfer};
-
+use anchor_spl::token::{self,Token, TokenAccount, Transfer};
+use crate::state::*;
+use crate::error::ErrorCode;
 
 #[derive(Accounts)]
-pub struct WithdrawFees<'info> {
+pub struct CancelPayment<'info> {
     #[account(mut)]
-    pub admin: Signer<'info>,
+    pub user: Signer<'info>,
+
+    #[account(
+        mut,
+        seeds=[b"payment_session",user.key().as_ref(),merchant.key().as_ref()],
+        bump = payment_session.bump,
+        constraint = payment_session.status == 0 @ ErrorCode::SessionNotPending
+    )]
+    pub payment_session: Account<'info,PaymentSession>,
+
+    pub merchant: UncheckedAccount<'info>,
 
     #[account(mut)]
-    pub fee_vault: Account<'info, TokenAccount>,
+    pub escrow_vault: Account<'info,TokenAccount>,
 
     #[account(mut)]
-    pub admin_token_account: Account<'info, TokenAccount>,
+    pub user_token_account: Account<'info,TokenAccount>,
 
     pub token_program: Program<'info, Token>,
 }
 
-impl<'info> WithdrawFees<'info> {
-    pub fn withdraw(&mut self, amount: u64) -> Result<()> {
+impl<'info> CancelPayment<'info> {
+    pub fn cancel(&mut self) -> Result<()> {
+         // Transfer from escrow back to user
+        let payment_session_key = self.payment_session.key();
+        let seeds = &[
+            b"escrow_vault",
+            payment_session_key.as_ref(),
+            &[self.payment_session.bump],
+        ];
+
+         let signer_seeds = &[&seeds[..]];
+
         let cpi_accounts = Transfer {
-            from: self.fee_vault.to_account_info(),
-            to: self.admin_token_account.to_account_info(),
-            authority: self.admin.to_account_info(),
+            from: self.escrow_vault.to_account_info(),
+            to: self.user_token_account.to_account_info(),
+            authority: self.payment_session.to_account_info(), // PDA as authority
         };
-        let cpi_program = self.token_program.to_account_info();
-        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
-        anchor_spl::token::transfer(cpi_ctx, amount)?;
+
+        let cpi_ctx = CpiContext::new_with_signer(
+            self.token_program.to_account_info(),
+            cpi_accounts,
+            signer_seeds,
+        );
+
+        token::transfer(cpi_ctx, self.escrow_vault.amount)?;
+
+        self.payment_session.status = 2; // Cancelled
         Ok(())
     }
 }

@@ -3,7 +3,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Token, TokenAccount, Transfer, TransferChecked, Mint};
 use crate::state::*;
-use crate::state::ErrorCode;
+use crate::error::ErrorCode;
 
 #[derive(Accounts)]
 pub struct DepositTokens<'info> {
@@ -53,6 +53,4 @@ impl<'info> DepositTokens<'info> {
     }
 }
 
-pub fn deposit_tokens(ctx: Context<DepositTokens>, amount: u64) -> Result<()> {
-    ctx.accounts.deposit(amount)
-}
+
