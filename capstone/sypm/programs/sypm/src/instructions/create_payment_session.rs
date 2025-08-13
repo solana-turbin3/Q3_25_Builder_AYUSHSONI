@@ -32,12 +32,14 @@ pub struct CreatePaymentSession<'info> {
 impl <'info> CreatePaymentSession<'info> {
     pub fn create(
         &mut self,
+        preferred_token:Pubkey,
         split_tokens: Vec<(Pubkey,u64)>,
         bumps: &CreatePaymentSessionBumps,
     ) -> Result<()> {
         self.payment_session.set_inner(PaymentSession {
              user: self.user.key(),
              merchant: self.merchant.key(),
+             preferred_token,
              split_tokens,
              status:0,
              bump:bumps.payment_session,
