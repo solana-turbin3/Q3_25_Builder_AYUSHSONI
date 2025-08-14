@@ -34,6 +34,7 @@ impl <'info> CreatePaymentSession<'info> {
         &mut self,
         preferred_token:Pubkey,
         split_tokens: Vec<(Pubkey,u64)>,
+        total_requested: u64,
         bumps: &CreatePaymentSessionBumps,
     ) -> Result<()> {
         self.payment_session.set_inner(PaymentSession {
@@ -41,6 +42,7 @@ impl <'info> CreatePaymentSession<'info> {
              merchant: self.merchant.key(),
              preferred_token,
              split_tokens,
+             total_requested,
              status:0,
              bump:bumps.payment_session,
             });
