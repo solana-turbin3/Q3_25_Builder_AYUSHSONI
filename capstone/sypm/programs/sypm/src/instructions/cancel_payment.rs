@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self,Token, TokenAccount, Transfer};
+use anchor_spl::associated_token::AssociatedToken;
 use crate::state::*;
 use crate::error::ErrorCode;
 
@@ -16,6 +17,7 @@ pub struct CancelPayment<'info> {
     )]
     pub payment_session: Account<'info,PaymentSession>,
 
+    /// CHECK: Merchant only for PDA derivation
     pub merchant: UncheckedAccount<'info>,
 
     // Escrow authority PDA
@@ -23,6 +25,7 @@ pub struct CancelPayment<'info> {
         seeds = [b"escrow", payment_session.key().as_ref()],
         bump
     )]
+    /// CHECK: PDA derived from payment_session
     pub escrow_authority: UncheckedAccount<'info>,
 
     #[account(

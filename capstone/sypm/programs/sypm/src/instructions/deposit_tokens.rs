@@ -2,6 +2,7 @@
 
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Token, TokenAccount, TransferChecked, Mint};
+use anchor_spl::associated_token::AssociatedToken;
 use crate::state::*;
 use crate::error::ErrorCode;
 
@@ -26,6 +27,7 @@ pub struct DepositTokens<'info> {
         seeds = [b"escrow", payment_session.key().as_ref()],
         bump
     )]
+    /// CHECK: PDA derived from payment_session
     pub escrow_authority: UncheckedAccount<'info>,
 
     // Escrow account (SPL token account owned by escrow_authority PDA)

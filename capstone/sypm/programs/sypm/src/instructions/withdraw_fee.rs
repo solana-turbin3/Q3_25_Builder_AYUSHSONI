@@ -1,5 +1,9 @@
+#![allow(unexpected_cfgs)]
+#![allow(deprecated)]
+
 use anchor_lang::prelude::*;
 use anchor_spl::token::{transfer, Token, TokenAccount, Transfer};
+use anchor_spl::associated_token::AssociatedToken;
 
 #[derive(Accounts)]
 pub struct Withdraw<'info> {
@@ -11,6 +15,7 @@ pub struct Withdraw<'info> {
         seeds=[b"fee_vault"],
         bump
     )]
+    /// CHECK: PDA derived from fee_vault seeds
     pub fee_vault_authority: UncheckedAccount<'info>,
 
     #[account(

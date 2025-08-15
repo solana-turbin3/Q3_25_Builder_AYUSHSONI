@@ -1,3 +1,6 @@
+#![allow(unexpected_cfgs)]
+#![allow(deprecated)]
+
 use crate::state::*;
 use anchor_lang::prelude::*;
 

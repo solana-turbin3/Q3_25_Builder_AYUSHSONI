@@ -1,3 +1,6 @@
+#![allow(unexpected_cfgs)]
+// #![allow(deprecated)]
+
 use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{Token, TokenAccount, transfer, Transfer, Mint};
@@ -27,6 +30,7 @@ pub struct FinalizePayment<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
 
+    /// CHECK: Merchant only for validation and PDA derivation
     pub merchant: UncheckedAccount<'info>,
 
     #[account(
@@ -47,6 +51,7 @@ pub struct FinalizePayment<'info> {
         seeds = [b"escrow", payment_session.key().as_ref()],
         bump
     )]
+    /// CHECK: PDA derived from payment_session
     pub escrow_authority: UncheckedAccount<'info>,
 
     #[account(
@@ -60,6 +65,7 @@ pub struct FinalizePayment<'info> {
         seeds = [b"fee_vault"],
         bump
     )]
+    /// CHECK: PDA derived from fee_vault seeds
     pub fee_vault_authority: UncheckedAccount<'info>,
 
     #[account(
@@ -83,6 +89,7 @@ pub struct FinalizePayment<'info> {
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
 
+    /// CHECK: Jupiter program for token swaps
     pub jupiter_program: UncheckedAccount<'info>,
 }
 

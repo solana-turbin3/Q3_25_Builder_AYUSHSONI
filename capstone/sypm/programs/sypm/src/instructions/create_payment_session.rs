@@ -32,8 +32,8 @@ pub struct CreatePaymentSession<'info> {
 impl <'info> CreatePaymentSession<'info> {
     pub fn create(
         &mut self,
-        preferred_token:Pubkey,
-        split_tokens: Vec<(Pubkey,u64)>,
+        preferred_token: Pubkey,
+        split_tokens: Vec<(Pubkey, u64)>,
         total_requested: u64,
         bumps: &CreatePaymentSessionBumps,
     ) -> Result<()> {
@@ -43,10 +43,10 @@ impl <'info> CreatePaymentSession<'info> {
              preferred_token,
              split_tokens,
              total_requested,
-             status:0,
-             bump:bumps.payment_session,
-            });
+             status: 0,
+             bump: bumps.payment_session,
+        });
 
-          Ok(())  
+        Ok(())  
     }
 }
