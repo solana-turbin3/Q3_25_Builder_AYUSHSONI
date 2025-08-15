@@ -10,6 +10,7 @@ import {
   mintTo,
   getAccount
 } from "@solana/spl-token";
+
 import { PublicKey, Keypair, SystemProgram, SYSVAR_RENT_PUBKEY } from "@solana/web3.js";
 
 describe("sypm", () => {
@@ -26,12 +27,12 @@ describe("sypm", () => {
   // Test token mints
   let usdcMint: PublicKey;
   let solMint: PublicKey;
-  let ethMint: PublicKey;
+  let bonkMint: PublicKey;
   
   // Test token accounts
   let userUsdcAccount: PublicKey;
   let userSolAccount: PublicKey;
-  let userEthAccount: PublicKey;
+  let userBonkAccount: PublicKey;
   let merchantUsdcAccount: PublicKey;
   
   // PDAs
@@ -83,15 +84,15 @@ describe("sypm", () => {
     );
     console.log("SOL mint created:", solMint.toString());
     
-    // Create ETH mint (18 decimals)
-    ethMint = await createMint(
+    // Create BONK mint (5 decimals)
+    bonkMint = await createMint(
       connection,
       user,
       user.publicKey,
       user.publicKey,
-      18
+      5
     );
-    console.log("ETH mint created:", ethMint.toString());
+    console.log("BONK mint created:", bonkMint.toString());
   });
 
   it("Create token accounts", async () => {
@@ -100,7 +101,7 @@ describe("sypm", () => {
     // Create user token accounts
     userUsdcAccount = await getAssociatedTokenAddress(usdcMint, user.publicKey);
     userSolAccount = await getAssociatedTokenAddress(solMint, user.publicKey);
-    userEthAccount = await getAssociatedTokenAddress(ethMint, user.publicKey);
+    userBonkAccount = await getAssociatedTokenAddress(bonkMint, user.publicKey);
     
     // Create merchant USDC account
     merchantUsdcAccount = await getAssociatedTokenAddress(usdcMint, merchant.publicKey);
@@ -108,13 +109,13 @@ describe("sypm", () => {
     // Create accounts
     await createAccount(connection, user, usdcMint, userUsdcAccount, user.publicKey);
     await createAccount(connection, user, solMint, userSolAccount, user.publicKey);
-    await createAccount(connection, user, ethMint, userEthAccount, user.publicKey);
+    await createAccount(connection, user, bonkMint, userBonkAccount, user.publicKey);
     await createAccount(connection, user, usdcMint, merchantUsdcAccount, merchant.publicKey);
     
     // Mint tokens to user
     await mintTo(connection, user, usdcMint, userUsdcAccount, user.publicKey, 1000000); // 1 USDC
     await mintTo(connection, user, solMint, userSolAccount, user.publicKey, 1000000000); // 1 SOL
-    await mintTo(connection, user, ethMint, userEthAccount, user.publicKey, 1000000000000000000); // 1 ETH
+    await mintTo(connection, user, bonkMint, userBonkAccount, user.publicKey, 100000000); // 1 BONK
     
     console.log("Token accounts created and funded");
   });
@@ -126,7 +127,7 @@ describe("sypm", () => {
     );
     merchantRegistryPda = merchantRegistryPdaKey;
     
-    const acceptedTokens = [usdcMint, solMint, ethMint];
+    const acceptedTokens = [usdcMint, solMint, bonkMint];
     const fallbackToken = usdcMint;
     
     const tx = await program.methods
@@ -179,7 +180,7 @@ describe("sypm", () => {
     const splitTokens = [
       [usdcMint, 500000], // 0.5 USDC
       [solMint, 500000000], // 0.5 SOL
-      [ethMint, 500000000000000000] // 0.5 ETH
+      [bonkMint, 50000000] // 0.5 BONK
     ];
     
     const totalRequested = 1000000; // 1 USDC (merchant's preferred token)
@@ -215,7 +216,7 @@ describe("sypm", () => {
     // Create escrow ATAs for each token
     const escrowUsdcAta = await getAssociatedTokenAddress(usdcMint, escrowAuthorityPda);
     const escrowSolAta = await getAssociatedTokenAddress(solMint, escrowAuthorityPda);
-    const escrowEthAta = await getAssociatedTokenAddress(ethMint, escrowAuthorityPda);
+    const escrowBonkAta = await getAssociatedTokenAddress(bonkMint, escrowAuthorityPda);
     
     // Deposit USDC
     const tx1 = await program.methods
@@ -257,16 +258,16 @@ describe("sypm", () => {
     
     console.log("SOL deposited:", tx2);
     
-    // Deposit ETH
+    // Deposit BONK
     const tx3 = await program.methods
-      .depositTokens(500000000000000000) // 0.5 ETH
+      .depositTokens(50000000) // 0.5 BONK
       .accounts({
         user: user.publicKey,
         paymentSession: paymentSessionPda,
         merchant: merchant.publicKey,
         escrowAuthority: escrowAuthorityPda,
-        tokenMint: ethMint,
-        userTokenAccount: userEthAccount,
+        tokenMint: bonkMint,
+        userTokenAccount: userBonkAccount,
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         tokenProgram: TOKEN_PROGRAM_ID,
         systemProgram: SystemProgram.programId,
@@ -274,14 +275,14 @@ describe("sypm", () => {
       .signers([user])
       .rpc();
     
-    console.log("ETH deposited:", tx3);
+    console.log("BONK deposited:", tx3);
   });
 
   it("Finalize payment (mock Jupiter)", async () => {
     // Mock Jupiter instruction data
     const jupiterIxDatas = [
       Buffer.from([0, 0]), // Mock swap data for SOL->USDC
-      Buffer.from([0, 0]), // Mock swap data for ETH->USDC
+      Buffer.from([0, 0]), // Mock swap data for BONK->USDC
     ];
     
     const tx = await program.methods
@@ -308,8 +309,8 @@ describe("sypm", () => {
         { pubkey: usdcMint, isSigner: false, isWritable: false },
         { pubkey: await getAssociatedTokenAddress(solMint, escrowAuthorityPda), isSigner: false, isWritable: true },
         { pubkey: solMint, isSigner: false, isWritable: false },
-        { pubkey: await getAssociatedTokenAddress(ethMint, escrowAuthorityPda), isSigner: false, isWritable: true },
-        { pubkey: ethMint, isSigner: false, isWritable: false },
+        { pubkey: await getAssociatedTokenAddress(bonkMint, escrowAuthorityPda), isSigner: false, isWritable: true },
+        { pubkey: bonkMint, isSigner: false, isWritable: false },
       ])
       .signers([user])
       .rpc();
