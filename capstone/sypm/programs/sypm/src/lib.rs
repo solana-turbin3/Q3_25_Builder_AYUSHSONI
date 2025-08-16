@@ -46,16 +46,21 @@ pub mod sypm {
     pub fn create_payment_session(
         ctx: Context<CreatePaymentSession>,
         preferred_token: Pubkey,
-        split_tokens: Vec<(Pubkey, u64)>,
+        split_tokens: Vec<SplitToken>, // <- Use the struct instead of tuple
         total_requested: u64,
     ) -> Result<()> {
-        ctx.accounts.create(preferred_token, split_tokens, total_requested, &ctx.bumps)
+        ctx.accounts.create(
+            preferred_token, 
+            split_tokens,
+            total_requested,
+            &ctx.bumps
+        )
     }
 
     pub fn finalize_payment(
         ctx: Context<FinalizePayment>,
         jupiter_ix_datas: Vec<Vec<u8>>,
     ) -> Result<()> {
-        ctx.accounts.finalize_token(jupiter_ix_datas)
+        ctx.accounts.finalize_token(jupiter_ix_datas, ctx.bumps.escrow_authority)
     }
 }
