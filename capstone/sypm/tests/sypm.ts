@@ -39,16 +39,86 @@ describe("sypm", () => {
   let merchantRegistryPda: PublicKey;
 
   before(async () => {
-    // Airdrop SOL to test accounts
     const connection = anchor.getProvider().connection;
-    await connection.requestAirdrop(user.publicKey, 10 * anchor.web3.LAMPORTS_PER_SOL);
-    await connection.requestAirdrop(merchant.publicKey, 10 * anchor.web3.LAMPORTS_PER_SOL);
-    await connection.requestAirdrop(admin.publicKey, 10 * anchor.web3.LAMPORTS_PER_SOL);
     
-    // Wait for airdrop confirmation
-    await connection.confirmTransaction(await connection.requestAirdrop(user.publicKey, 10 * anchor.web3.LAMPORTS_PER_SOL));
-    await connection.confirmTransaction(await connection.requestAirdrop(merchant.publicKey, 10 * anchor.web3.LAMPORTS_PER_SOL));
-    await connection.confirmTransaction(await connection.requestAirdrop(admin.publicKey, 10 * anchor.web3.LAMPORTS_PER_SOL));
+    // Check if we're on devnet and have sufficient SOL
+    const cluster = connection.rpcEndpoint;
+    const isDevnet = cluster.includes('devnet');
+    
+    if (isDevnet) {
+      console.log("Running on devnet - checking balances...");
+      
+      // Check current wallet balance
+      const currentBalance = await connection.getBalance(anchor.getProvider().wallet.publicKey);
+      const requiredBalance = 3 * 2 * anchor.web3.LAMPORTS_PER_SOL; // 6 SOL total needed (2 per account)
+      
+      if (currentBalance < requiredBalance) {
+        console.log("Insufficient balance for testing. Please get more devnet SOL from https://faucet.solana.com");
+        console.log("Current balance:", currentBalance / anchor.web3.LAMPORTS_PER_SOL, "SOL");
+        console.log("Required balance:", requiredBalance / anchor.web3.LAMPORTS_PER_SOL, "SOL");
+        throw new Error("Insufficient devnet SOL for testing");
+      }
+      
+      console.log("Sufficient balance for testing. Transferring SOL to test accounts...");
+      
+      // Transfer SOL to test accounts instead of airdropping
+      const transferAmount = 2 * anchor.web3.LAMPORTS_PER_SOL; // 2 SOL each
+      
+      // Transfer to user account
+      const userTransferTx = await connection.sendTransaction(
+        new anchor.web3.Transaction().add(
+          anchor.web3.SystemProgram.transfer({
+            fromPubkey: anchor.getProvider().wallet.publicKey,
+            toPubkey: user.publicKey,
+            lamports: transferAmount,
+          })
+        ),
+        [anchor.getProvider().wallet.payer]
+      );
+      await connection.confirmTransaction(userTransferTx);
+      console.log("Transferred 2 SOL to user account");
+      
+      // Transfer to merchant account
+      const merchantTransferTx = await connection.sendTransaction(
+        new anchor.web3.Transaction().add(
+          anchor.web3.SystemProgram.transfer({
+            fromPubkey: anchor.getProvider().wallet.publicKey,
+            toPubkey: merchant.publicKey,
+            lamports: transferAmount,
+          })
+        ),
+        [anchor.getProvider().wallet.payer]
+      );
+      await connection.confirmTransaction(merchantTransferTx);
+      console.log("Transferred 2 SOL to merchant account");
+      
+      // Transfer to admin account
+      const adminTransferTx = await connection.sendTransaction(
+        new anchor.web3.Transaction().add(
+          anchor.web3.SystemProgram.transfer({
+            fromPubkey: anchor.getProvider().wallet.publicKey,
+            toPubkey: admin.publicKey,
+            lamports: transferAmount,
+          })
+        ),
+        [anchor.getProvider().wallet.payer]
+      );
+      await connection.confirmTransaction(adminTransferTx);
+      console.log("Transferred 2 SOL to admin account");
+      
+      console.log("SOL transfer completed. Proceeding with tests...");
+    } else {
+      // Only airdrop on localnet
+      console.log("Running on localnet - airdropping SOL...");
+      await connection.requestAirdrop(user.publicKey, 10 * anchor.web3.LAMPORTS_PER_SOL);
+      await connection.requestAirdrop(merchant.publicKey, 10 * anchor.web3.LAMPORTS_PER_SOL);
+      await connection.requestAirdrop(admin.publicKey, 10 * anchor.web3.LAMPORTS_PER_SOL);
+      
+      // Wait for airdrop confirmation
+      await connection.confirmTransaction(await connection.requestAirdrop(user.publicKey, 10 * anchor.web3.LAMPORTS_PER_SOL));
+      await connection.confirmTransaction(await connection.requestAirdrop(merchant.publicKey, 10 * anchor.web3.LAMPORTS_PER_SOL));
+      await connection.confirmTransaction(await connection.requestAirdrop(admin.publicKey, 10 * anchor.web3.LAMPORTS_PER_SOL));
+    }
   });
 
   it("Initialize program", async () => {
