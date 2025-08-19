@@ -13,7 +13,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("Bo7KK9TXMvoyL8EuBaoD3aWnRfXvaDzJV3sonBo7GguG");
+declare_id!("9ANuoSrq71sWTXbx41cdXSeL6hgpYUiDBoT3PTNueq6W");
 
 #[program]
 pub mod sypm {
